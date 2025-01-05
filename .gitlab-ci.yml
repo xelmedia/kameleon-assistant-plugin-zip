@@ -1,16 +1,9 @@
 mirror_to_github:
   script:
     - git config --global http.postBuffer 157286400
-    # Debug info
-    - echo "Repository URL: $CI_REPOSITORY_URL"
-    - echo "Repository name: $(basename $CI_REPOSITORY_URL)"
-    # Clone with explicit path
     - git clone --mirror $CI_REPOSITORY_URL ./repo-mirror
     - cd ./repo-mirror
-    # Add GitHub remote and push
     - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/xelmedia/kameleon-assistant-plugin-zip.git
-    - git remote -v
-    # Push changes
     - git push --force github refs/heads/*:refs/heads/*
     - git push --force github refs/tags/*:refs/tags/*
   only:
