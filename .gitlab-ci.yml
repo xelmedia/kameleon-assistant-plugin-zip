@@ -24,16 +24,8 @@ github_release:
   script:
     - which curl || echo "curl is required"
     - which jq || echo "jq is required"
-    
-    # Debug: Print file existence and size
-    - ls -l ${PLUGIN_NAME}.zip || echo "Zip file not found"
-    
-    # Create GitHub Release using API
     - |
       GITHUB_API="https://api.github.com/repos/${GITHUB_REPO}"
-      echo "Creating release for tag ${CI_COMMIT_TAG}"
-      
-      # Create release
       RELEASE_RESPONSE=$(curl -s -X POST \
         -H "Authorization: token ${GITHUB_TOKEN}" \
         -H "Accept: application/vnd.github.v3+json" \
@@ -45,25 +37,11 @@ github_release:
           \"draft\": false,
           \"prerelease\": false
         }")
-      
-      # Debug: Print release response
-      echo "Release response:"
-      echo "${RELEASE_RESPONSE}"
-      
-      # Extract release ID and check if it exists
       RELEASE_ID=$(echo ${RELEASE_RESPONSE} | jq -r '.id')
-      
       if [ "${RELEASE_ID}" = "null" ]; then
-        echo "Failed to get release ID"
         exit 1
       fi
-      
-      echo "Release ID: ${RELEASE_ID}"
-      
-      # Upload the asset
-      echo "Uploading asset ${PLUGIN_NAME}.zip"
       UPLOAD_URL="https://uploads.github.com/repos/${GITHUB_REPO}/releases/${RELEASE_ID}/assets?name=${PLUGIN_NAME}.zip"
-      
       curl -s -X POST \
         -H "Authorization: token ${GITHUB_TOKEN}" \
         -H "Content-Type: application/zip" \
