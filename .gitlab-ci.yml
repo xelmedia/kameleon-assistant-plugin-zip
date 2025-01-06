@@ -22,12 +22,15 @@ mirror_to_github:
 github_release:
   stage: release
   script:
-    - sudo apt-get update -qq
-    - sudo apt-get install -y curl jq
+    # Check if required commands are available
+    - which curl || echo "curl is required"
+    - which jq || echo "jq is required"
     
+    # Create GitHub Release using API
     - |
       GITHUB_API="https://api.github.com/repos/${GITHUB_REPO}"
       
+      # Create release
       RELEASE_RESPONSE=$(curl -X POST \
         -H "Authorization: token ${GITHUB_TOKEN}" \
         -H "Accept: application/vnd.github.v3+json" \
@@ -40,8 +43,10 @@ github_release:
           \"prerelease\": false
         }")
       
+      # Extract release ID
       RELEASE_ID=$(echo $RELEASE_RESPONSE | jq -r .id)
       
+      # Upload the existing zip file
       curl -X POST \
         -H "Authorization: token ${GITHUB_TOKEN}" \
         -H "Content-Type: application/zip" \
